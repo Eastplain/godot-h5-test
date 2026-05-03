@@ -2,8 +2,10 @@ extends Node2D
 # H5 Test — 验证 HTML5 导出的每个关键点
 
 @onready var font_status: Label = $UI/FontStatus
+@onready var tap_btn: Button = $UI/TapBtn
 
 var touch_positions: Array = []   # 最近 20 个触屏位置
+var tap_count: int = 0
 
 func _ready():
 	print("[main] H5 Test started. Engine: ", Engine.get_version_info())
@@ -15,6 +17,14 @@ func _ready():
 	else:
 		font_status.text = "✗ 字体未加载！"
 		printerr("[main] Font NOT loaded!")
+	
+	# 按钮点击测试
+	tap_btn.pressed.connect(_on_tap)
+	
+func _on_tap():
+	tap_count += 1
+	tap_btn.text = "点击: %d" % tap_count
+	print("[main] Button clicked! count=%d" % tap_count)
 
 func _process(_delta):
 	queue_redraw()

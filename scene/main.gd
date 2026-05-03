@@ -10,7 +10,7 @@ func _ready():
 	# 验证字体是否已加载
 	var theme = get_tree().root.theme
 	if theme and theme.default_font:
-		font_status.text = "✓ 字体已加载: h5font (21KB)"
+		font_status.text = "✓ 字体已加载: simhei.ttf"
 		print("[main] Font loaded OK")
 	else:
 		font_status.text = "✗ 字体未加载！"

@@ -1,0 +1,12 @@
+# Godot — 本地编辑器生成，不应提交
+.godot/
+.import/
+*.translation
+export_presets.cfg
+
+# Export builds
+export/
+
+# OS generated
+.DS_Store
+Thumbs.db

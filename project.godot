@@ -25,6 +25,11 @@ FontSetup="*res://scene/fontSetup.gd"
 window/size/viewport_width=720
 window/size/viewport_height=1280
 window/stretch/mode="canvas_items"
+window/stretch/scale_mode="fractional"
+
+[gui]
+
+theme/custom_font="res://resource/font/simhei.ttf"
 
 [input]
 

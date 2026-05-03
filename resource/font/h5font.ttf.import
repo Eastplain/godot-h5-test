@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://xdyu5d5wo06"
-path="res://.godot/imported/simhei.ttf-d7df025e0c51fe2fe10bd687fc301ae9.fontdata"
+uid="uid://ype56skn1uct"
+path="res://.godot/imported/h5font.ttf-82858b83b21a5dc916f4c60fc1fcd913.fontdata"
 
 [deps]
 
-source_file="res://resource/font/simhei.ttf"
-dest_files=["res://.godot/imported/simhei.ttf-d7df025e0c51fe2fe10bd687fc301ae9.fontdata"]
+source_file="res://resource/font/h5font.ttf"
+dest_files=["res://.godot/imported/h5font.ttf-82858b83b21a5dc916f4c60fc1fcd913.fontdata"]
 
 [params]
 

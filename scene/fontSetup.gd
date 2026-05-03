@@ -4,12 +4,12 @@ extends Node
 # this runtime approach is the only stable method.
 
 func _ready():
-	var font = load("res://resource/font/simhei.ttf")
+	var font = load("res://resource/font/h5font.ttf")
 	if font:
 		var theme = Theme.new()
 		theme.default_font = font
 		theme.default_font_size = 16
 		get_tree().root.theme = theme
-		print("[FontSetup] simhei.ttf loaded, theme applied")
+		print("[FontSetup] h5font.ttf loaded, theme applied")
 	else:
-		printerr("[FontSetup] FAILED to load simhei.ttf")
+		printerr("[FontSetup] FAILED to load h5font.ttf")

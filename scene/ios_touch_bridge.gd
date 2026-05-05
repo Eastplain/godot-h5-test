@@ -48,31 +48,44 @@ func _process(_delta):
 	if frame_count % 10 != 1:
 		return  # 每10帧查一次，节省开销
 	
-	# 方法1: 直接读队列长度
-	var direct_len = JavaScriptBridge.eval("window.__godotTouchQueue?window.__godotTouchQueue.length:-1")
+	# 测试 JavaScriptBridge 是否可用
+	var bridge_ok = JavaScriptBridge != null
+	var has_eval = JavaScriptBridge.has_method("eval")
+	var has_get = JavaScriptBridge.has_method("get_interface")
 	
-	# 方法2: 尝试通过不同的方式读队列内容
-	var direct_data = JavaScriptBridge.eval("window.__godotTouchQueue?JSON.stringify(window.__godotTouchQueue.slice(0,3)):'null'")
+	# 测试 eval 基本功能
+	var test_num = JavaScriptBridge.eval("42")
+	var test_str = JavaScriptBridge.eval("'hello'")
+	var test_bool = JavaScriptBridge.eval("true")
+	var tn = typeof(test_num)
+	var ts = typeof(test_str)
+	var tb = typeof(test_bool)
 	
-	# 方法3: 尝试读一个简单字符串
-	var hello = JavaScriptBridge.eval("'hello'")
-	var hello_type = typeof(hello)
+	# 尝试 get_interface 方式直接读取队列
+	var q_obj = JavaScriptBridge.get_interface("__godotTouchQueue")
+	var q_len = -2
+	var q_item0 = ""
+	if q_obj != null:
+		q_len = q_obj.get("length")
+		if q_len > 0:
+			var first = q_obj.call("shift")
+			if first != null:
+				q_item0 = str(first)
 	
 	if dbg and frame_count % 30 == 1:
-		# 尝试调用 drain
 		var drain_result = JavaScriptBridge.eval("window.__godotTouchDrain()")
 		var dr_type = typeof(drain_result)
 		var dr_str: String = drain_result if typeof(drain_result) == TYPE_STRING else ""
-		dbg.text = "[Bridge] qlen=%s direct=%s hello=%s/%s dr_len=%d/%s" % [
-			str(direct_len),
-			str(direct_data).left(40),
-			str(hello),
-			str(hello_type),
-			dr_str.length(),
-			str(dr_type)
+		dbg.text = "[Bridge] bridge=%s eval=%s get=%s n=%s/%s s=%s/%s b=%s/%s qobj=%s qlen=%s drain=%s/%s" % [
+			str(bridge_ok), str(has_eval), str(has_get),
+			str(test_num), str(tn),
+			str(test_str), str(ts),
+			str(test_bool), str(tb),
+			str(q_obj != null), str(q_len),
+			str(dr_type), dr_str.left(30)
 		]
 		
-		# 如果有数据，处理
+		# 如果有 drain 数据，处理
 		if dr_type == TYPE_STRING and dr_str.length() > 0:
 			var items = dr_str.split(";")
 			for item in items:

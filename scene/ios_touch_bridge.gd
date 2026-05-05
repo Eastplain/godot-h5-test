@@ -50,9 +50,10 @@ func _process(_delta):
 	
 	# 用 get_interface 直接操作 DOM，完全绕过 eval
 	var doc = JavaScriptBridge.get_interface("document")
+	var dbg_el = null
 	var raw = ""
 	if doc != null:
-		var dbg_el = doc.call("getElementById", "_gd_touch_dbg")
+		dbg_el = doc.call("getElementById", "_gd_touch_dbg")
 		if dbg_el != null:
 			var q_attr = dbg_el.call("getAttribute", "data-queue")
 			if q_attr != null and q_attr.length() > 0:

@@ -48,35 +48,51 @@ func _process(_delta):
 	if frame_count % 10 != 1:
 		return  # 每10帧查一次
 	
-	# 用 get_interface 直接操作 DOM，完全绕过 eval
+	# 测试 get_interface 的基础功能
 	var doc = JavaScriptBridge.get_interface("document")
-	var dbg_el = null
-	var raw = ""
+	var doc_title = ""
+	var doc_url = ""
 	if doc != null:
-		dbg_el = doc.call("getElementById", "_gd_touch_dbg")
-		if dbg_el != null:
-			var q_attr = dbg_el.call("getAttribute", "data-queue")
-			if q_attr != null and q_attr.length() > 0:
-				raw = str(q_attr)
-				dbg_el.call("removeAttribute", "data-queue")
+		doc_title = str(doc.get("title"))
+		doc_url = str(doc.get("URL"))
 	
-	if raw.length() == 0:
-		if dbg and frame_count % 120 == 1:
-			var dom_text = ""
-			if doc != null and dbg_el != null:
-				dom_text = str(dbg_el.get("textContent"))
-			dbg.text = "[Bridge] idle dom=%s doc=%s" % [dom_text.left(40), str(doc != null)]
-		return
+	# 尝试不同的 DOM 方法
+	var dbg_el_by_id = null
+	var dbg_el_qs = null
+	if doc != null:
+		dbg_el_by_id = doc.call("getElementById", "_gd_touch_dbg")
+		dbg_el_qs = doc.call("querySelector", "#_gd_touch_dbg")
 	
-	var items = raw.split(";")
-	for item in items:
-		var parts = item.split("|")
-		if parts.size() == 4:
-			total_events += 1
-			_dispatch(parts[0], int(parts[1]), float(parts[2]), float(parts[3]))
+	var by_id_ok = str(dbg_el_by_id != null)
+	var qs_ok = str(dbg_el_qs != null)
 	
-	if dbg:
-		dbg.text = "[Bridge] DISPATCHED! total=%d batch=%d" % [total_events, items.size()]
+	# 如果有元素，读 textContent
+	var dom_text = ""
+	if dbg_el_qs != null:
+		dom_text = str(dbg_el_qs.get("textContent"))
+	
+	# 也尝试读取我们的 queue 数据
+	var raw = ""
+	if dbg_el_qs != null:
+		var q_attr = dbg_el_qs.call("getAttribute", "data-queue")
+		if q_attr != null and q_attr.length() > 0:
+			raw = str(q_attr)
+			dbg_el_qs.call("removeAttribute", "data-queue")
+	
+	if dbg and frame_count % 60 == 1:
+		dbg.text = "[Bridge] title=%s uri=%s byId=%s qs=%s txt=%s raw=%d" % [
+			doc_title, doc_url, by_id_ok, qs_ok, dom_text.left(20), raw.length()
+		]
+	
+	if raw.length() > 0:
+		var items = raw.split(";")
+		for item in items:
+			var parts = item.split("|")
+			if parts.size() == 4:
+				total_events += 1
+				_dispatch(parts[0], int(parts[1]), float(parts[2]), float(parts[3]))
+		if dbg:
+			dbg.text = "[Bridge] DISPATCHED! total=%d batch=%d" % [total_events, items.size()]
 
 func _dispatch(type: String, idx: int, x: float, y: float):
 	match type:

@@ -46,54 +46,31 @@ func _process(_delta):
 		return
 	
 	if frame_count % 10 != 1:
-		return  # 每10帧查一次，节省开销
+		return  # 每10帧查一次
 	
-	# 测试 JavaScriptBridge 是否可用
-	var bridge_ok = JavaScriptBridge != null
-	var has_eval = JavaScriptBridge.has_method("eval")
-	var has_get = JavaScriptBridge.has_method("get_interface")
+	# 通过 DOM 元素 data-queue 读 touch 数据
+	var raw = JavaScriptBridge.eval("document.getElementById('_gd_touch_dbg').getAttribute('data-queue')||''")
 	
-	# 测试 eval 基本功能
-	var test_num = JavaScriptBridge.eval("42")
-	var test_str = JavaScriptBridge.eval("'hello'")
-	var test_bool = JavaScriptBridge.eval("true")
-	var tn = typeof(test_num)
-	var ts = typeof(test_str)
-	var tb = typeof(test_bool)
+	if raw == null or raw.length() == 0:
+		if dbg and frame_count % 120 == 1:
+			var dom_text = JavaScriptBridge.eval("document.getElementById('_gd_touch_dbg').textContent.substring(0,50)")
+			var has_data = JavaScriptBridge.eval("document.getElementById('_gd_touch_dbg').getAttribute('data-queue')?'yes':'no'")
+			dbg.text = "[Bridge] idle dom=%s has=%s" % [str(dom_text), str(has_data)]
+		return
 	
-	# 尝试 get_interface 方式直接读取队列
-	var q_obj = JavaScriptBridge.get_interface("__godotTouchQueue")
-	var q_len = -2
-	var q_item0 = ""
-	if q_obj != null:
-		q_len = q_obj.get("length")
-		if q_len > 0:
-			var first = q_obj.call("shift")
-			if first != null:
-				q_item0 = str(first)
+	# 清理 DOM 中的数据标记
+	JavaScriptBridge.eval("document.getElementById('_gd_touch_dbg').removeAttribute('data-queue')")
 	
-	if dbg and frame_count % 30 == 1:
-		var drain_result = JavaScriptBridge.eval("window.__godotTouchDrain()")
-		var dr_type = typeof(drain_result)
-		var dr_str: String = drain_result if typeof(drain_result) == TYPE_STRING else ""
-		dbg.text = "[Bridge] bridge=%s eval=%s get=%s n=%s/%s s=%s/%s b=%s/%s qobj=%s qlen=%s drain=%s/%s" % [
-			str(bridge_ok), str(has_eval), str(has_get),
-			str(test_num), str(tn),
-			str(test_str), str(ts),
-			str(test_bool), str(tb),
-			str(q_obj != null), str(q_len),
-			str(dr_type), dr_str.left(30)
-		]
-		
-		# 如果有 drain 数据，处理
-		if dr_type == TYPE_STRING and dr_str.length() > 0:
-			var items = dr_str.split(";")
-			for item in items:
-				var parts = item.split("|")
-				if parts.size() == 4:
-					total_events += 1
-					_dispatch(parts[0], int(parts[1]), float(parts[2]), float(parts[3]))
-			dbg.text = "[Bridge] DISPATCHED! total=%d" % total_events
+	# 解析数据: "touchstart|0|x|y;touchend|0|x|y"
+	var items = raw.split(";")
+	for item in items:
+		var parts = item.split("|")
+		if parts.size() == 4:
+			total_events += 1
+			_dispatch(parts[0], int(parts[1]), float(parts[2]), float(parts[3]))
+	
+	if dbg:
+		dbg.text = "[Bridge] DISPATCHED! total=%d batch=%d" % [total_events, items.size()]
 
 func _dispatch(type: String, idx: int, x: float, y: float):
 	match type:

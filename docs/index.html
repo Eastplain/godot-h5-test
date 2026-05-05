@@ -92,7 +92,7 @@ body {
 		</style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
-<style>html,body,#canvas{width:100%;height:100%;margin:0;padding:0;overflow:hidden}canvas{display:block;touch-action:none}</style><script>console.log('[H5] load start, crossOriginIsolated='+self.crossOriginIsolated);window.addEventListener('load',function(){var iv=setInterval(function(){var c=document.getElementById('canvas');if(c){clearInterval(iv);console.log('[H5] canvas found');c.setAttribute('tabindex','0');c.focus();c.addEventListener('touchstart',function(e){e.preventDefault();var t=e.changedTouches[0];c.dispatchEvent(new PointerEvent('pointerdown',{pointerId:t.identifier,clientX:t.clientX,clientY:t.clientY,pointerType:'touch',isPrimary:true,bubbles:true,cancelable:true}));c.dispatchEvent(new MouseEvent('mousedown',{clientX:t.clientX,clientY:t.clientY,button:0,bubbles:true,cancelable:true}))},{passive:false});c.addEventListener('touchend',function(e){e.preventDefault();var t=e.changedTouches[0];c.dispatchEvent(new PointerEvent('pointerup',{pointerId:t.identifier,clientX:t.clientX,clientY:t.clientY,pointerType:'touch',isPrimary:true,bubbles:true,cancelable:true}));c.dispatchEvent(new MouseEvent('mouseup',{clientX:t.clientX,clientY:t.clientY,button:0,bubbles:true,cancelable:true}))},{passive:false})}},200)})</script>
+<style>html,body,#canvas{width:100%;height:100%;margin:0;padding:0;overflow:hidden}canvas{display:block;touch-action:none}</style><script>(function(){window.__godotTouchQueue=[];function q(e){e.preventDefault();for(var i=0;i<e.changedTouches.length;i++){var t=e.changedTouches[i];window.__godotTouchQueue.push({t:e.type,i:t.identifier,x:t.clientX,y:t.clientY})}}function s(){var c=document.getElementById('canvas');if(c){c.addEventListener('touchstart',q,{passive:false});c.addEventListener('touchmove',q,{passive:false});c.addEventListener('touchend',q,{passive:false});c.addEventListener('touchcancel',q,{passive:false});c.setAttribute('tabindex','0');c.focus();return true}return false}if(!s()){var iv=setInterval(function(){if(s())clearInterval(iv)},200)}})()</script>
 	</head>
 	<body>
 		<canvas id="canvas">
@@ -111,7 +111,7 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":50044,"index.wasm":37685705},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":51848,"index.wasm":37685705},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 

@@ -19,6 +19,7 @@ run/max_fps=60
 [autoload]
 
 FontSetup="*res://scene/fontSetup.gd"
+iOSBridge="*res://scene/ios_touch_bridge.gd"
 
 [display]
 

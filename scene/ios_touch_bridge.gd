@@ -48,15 +48,29 @@ func _process(_delta):
 	if frame_count % 10 != 1:
 		return  # 每10帧查一次，节省开销
 	
-	var raw: String = JavaScriptBridge.eval("__godotTouchDrain()")
+	var raw = JavaScriptBridge.eval("__godotTouchDrain()")
 	
-	if raw == null or raw.length() == 0:
-		if dbg:
-			if frame_count % 120 == 1:
-				dbg.text = "[Bridge] idle frame=%d" % frame_count
+	if raw == null:
+		if dbg and frame_count % 120 == 1:
+			var check = JavaScriptBridge.eval("typeof window.__godotTouchDrain")
+			var qlen = JavaScriptBridge.eval("(window.__godotTouchQueue?window.__godotTouchQueue.length:'noQ')")
+			dbg.text = "[Bridge] eval=NULL drain=%s qlen=%s" % [str(check), str(qlen)]
 		return
 	
-	var items = raw.split(";")
+	if typeof(raw) != TYPE_STRING:
+		if dbg and frame_count % 120 == 1:
+			dbg.text = "[Bridge] BAD TYPE! type=%s val=%s" % [typeof(raw), str(raw)]
+		return
+	
+	var raw_str: String = raw
+	if raw_str.length() == 0:
+		if dbg and frame_count % 120 == 1:
+			var check = JavaScriptBridge.eval("typeof window.__godotTouchDrain")
+			var qlen = JavaScriptBridge.eval("(window.__godotTouchQueue?window.__godotTouchQueue.length:'noQ')")
+			dbg.text = "[Bridge] empty drain=%s qlen=%s" % [str(check), str(qlen)]
+		return
+	
+	var items = raw_str.split(";")
 	for item in items:
 		var parts = item.split("|")
 		if parts.size() == 4:

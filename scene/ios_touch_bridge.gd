@@ -48,20 +48,25 @@ func _process(_delta):
 	if frame_count % 10 != 1:
 		return  # 每10帧查一次
 	
-	# 通过 DOM 元素 data-queue 读 touch 数据
-	var raw = JavaScriptBridge.eval("document.getElementById('_gd_touch_dbg').getAttribute('data-queue')||''")
+	# 用 get_interface 直接操作 DOM，完全绕过 eval
+	var doc = JavaScriptBridge.get_interface("document")
+	var raw = ""
+	if doc != null:
+		var dbg_el = doc.call("getElementById", "_gd_touch_dbg")
+		if dbg_el != null:
+			var q_attr = dbg_el.call("getAttribute", "data-queue")
+			if q_attr != null and q_attr.length() > 0:
+				raw = str(q_attr)
+				dbg_el.call("removeAttribute", "data-queue")
 	
-	if raw == null or raw.length() == 0:
+	if raw.length() == 0:
 		if dbg and frame_count % 120 == 1:
-			var dom_text = JavaScriptBridge.eval("document.getElementById('_gd_touch_dbg').textContent.substring(0,50)")
-			var has_data = JavaScriptBridge.eval("document.getElementById('_gd_touch_dbg').getAttribute('data-queue')?'yes':'no'")
-			dbg.text = "[Bridge] idle dom=%s has=%s" % [str(dom_text), str(has_data)]
+			var dom_text = ""
+			if doc != null and dbg_el != null:
+				dom_text = str(dbg_el.get("textContent"))
+			dbg.text = "[Bridge] idle dom=%s doc=%s" % [dom_text.left(40), str(doc != null)]
 		return
 	
-	# 清理 DOM 中的数据标记
-	JavaScriptBridge.eval("document.getElementById('_gd_touch_dbg').removeAttribute('data-queue')")
-	
-	# 解析数据: "touchstart|0|x|y;touchend|0|x|y"
 	var items = raw.split(";")
 	for item in items:
 		var parts = item.split("|")

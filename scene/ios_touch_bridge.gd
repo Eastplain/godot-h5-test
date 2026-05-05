@@ -48,37 +48,39 @@ func _process(_delta):
 	if frame_count % 10 != 1:
 		return  # 每10帧查一次，节省开销
 	
-	var raw = JavaScriptBridge.eval("__godotTouchDrain()")
+	# 方法1: 直接读队列长度
+	var direct_len = JavaScriptBridge.eval("window.__godotTouchQueue?window.__godotTouchQueue.length:-1")
 	
-	if raw == null:
-		if dbg and frame_count % 120 == 1:
-			var check = JavaScriptBridge.eval("typeof window.__godotTouchDrain")
-			var qlen = JavaScriptBridge.eval("(window.__godotTouchQueue?window.__godotTouchQueue.length:'noQ')")
-			dbg.text = "[Bridge] eval=NULL drain=%s qlen=%s" % [str(check), str(qlen)]
-		return
+	# 方法2: 尝试通过不同的方式读队列内容
+	var direct_data = JavaScriptBridge.eval("window.__godotTouchQueue?JSON.stringify(window.__godotTouchQueue.slice(0,3)):'null'")
 	
-	if typeof(raw) != TYPE_STRING:
-		if dbg and frame_count % 120 == 1:
-			dbg.text = "[Bridge] BAD TYPE! type=%s val=%s" % [typeof(raw), str(raw)]
-		return
+	# 方法3: 尝试读一个简单字符串
+	var hello = JavaScriptBridge.eval("'hello'")
+	var hello_type = typeof(hello)
 	
-	var raw_str: String = raw
-	if raw_str.length() == 0:
-		if dbg and frame_count % 120 == 1:
-			var check = JavaScriptBridge.eval("typeof window.__godotTouchDrain")
-			var qlen = JavaScriptBridge.eval("(window.__godotTouchQueue?window.__godotTouchQueue.length:'noQ')")
-			dbg.text = "[Bridge] empty drain=%s qlen=%s" % [str(check), str(qlen)]
-		return
-	
-	var items = raw_str.split(";")
-	for item in items:
-		var parts = item.split("|")
-		if parts.size() == 4:
-			total_events += 1
-			_dispatch(parts[0], int(parts[1]), float(parts[2]), float(parts[3]))
-	
-	if dbg:
-		dbg.text = "[Bridge] OK! total=%d batch=%d" % [total_events, items.size()]
+	if dbg and frame_count % 30 == 1:
+		# 尝试调用 drain
+		var drain_result = JavaScriptBridge.eval("window.__godotTouchDrain()")
+		var dr_type = typeof(drain_result)
+		var dr_str: String = drain_result if typeof(drain_result) == TYPE_STRING else ""
+		dbg.text = "[Bridge] qlen=%s direct=%s hello=%s/%s dr_len=%d/%s" % [
+			str(direct_len),
+			str(direct_data).left(40),
+			str(hello),
+			str(hello_type),
+			dr_str.length(),
+			str(dr_type)
+		]
+		
+		# 如果有数据，处理
+		if dr_type == TYPE_STRING and dr_str.length() > 0:
+			var items = dr_str.split(";")
+			for item in items:
+				var parts = item.split("|")
+				if parts.size() == 4:
+					total_events += 1
+					_dispatch(parts[0], int(parts[1]), float(parts[2]), float(parts[3]))
+			dbg.text = "[Bridge] DISPATCHED! total=%d" % total_events
 
 func _dispatch(type: String, idx: int, x: float, y: float):
 	match type:
